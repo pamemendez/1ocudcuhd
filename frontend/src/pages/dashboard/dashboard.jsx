@@ -4,73 +4,73 @@ import { PlusCircle, MessageCircle, Loader, Award } from 'lucide-react';
 import MainHeader from '../../componets/mainHeader/mainHeader';
 
 const datasets = {
-  Adoção: {
-    title: 'Adoção',
+  Adoption: {
+    title: 'Adoption',
     color1: '#60a5fa',
     color2: '#93c5fd',
     data: [
-      { dia: 'domingo', valor1: 100, valor2: 80 },
-      { dia: 'segunda-feira', valor1: 120, valor2: 90 },
-      { dia: 'terça-feira', valor1: 200, valor2: 150 },
-      { dia: 'quarta-feira', valor1: 170, valor2: 130 },
-      { dia: 'quinta-feira', valor1: 140, valor2: 100 },
-      { dia: 'sexta-feira', valor1: 160, valor2: 110 },
-      { dia: 'sábado', valor1: 190, valor2: 170 },
+      { dia: 'sunday', valor1: 100, valor2: 80 },
+      { dia: 'monday', valor1: 120, valor2: 90 },
+      { dia: 'tuesday', valor1: 200, valor2: 150 },
+      { dia: 'wednesday', valor1: 170, valor2: 130 },
+      { dia: 'Thursday', valor1: 140, valor2: 100 },
+      { dia: 'friday', valor1: 160, valor2: 110 },
+      { dia: 'saturday', valor1: 190, valor2: 170 },
     ]
   },
-  Engajamento: {
-    title: 'Engajamento',
+  Engagement: {
+    title: 'Engagement',
     color1: '#a855f7',
     color2: '#06b6d4',
     data: [
-      { dia: 'domingo', valor1: 200, valor2: 150 },
-      { dia: 'segunda-feira', valor1: 180, valor2: 120 },
-      { dia: 'terça-feira', valor1: 380, valor2: 290 },
-      { dia: 'quarta-feira', valor1: 280, valor2: 260 },
-      { dia: 'quinta-feira', valor1: 160, valor2: 100 },
-      { dia: 'sexta-feira', valor1: 140, valor2: 110 },
-      { dia: 'sábado', valor1: 310, valor2: 300 },
+      { dia: 'sunday', valor1: 200, valor2: 150 },
+      { dia: 'monday', valor1: 180, valor2: 120 },
+      { dia: 'tuesday', valor1: 380, valor2: 290 },
+      { dia: 'wednesday', valor1: 280, valor2: 260},
+      { dia: 'Thursday', valor1: 160, valor2: 100 },
+      { dia: 'friday', valor1: 140, valor2: 110 },
+      { dia: 'saturday', valor1: 310, valor2: 300 },
     ]
   },
-  Retenção: {
-    title: 'Retenção',
+  Retention: {
+    title: 'Retention',
     color1: '#6366f1',
     color2: '#818cf8',
     data: [
-      { dia: 'domingo', valor1: 50, valor2: 30 },
-      { dia: 'segunda-feira', valor1: 70, valor2: 40 },
-      { dia: 'terça-feira', valor1: 110, valor2: 80 },
-      { dia: 'quarta-feira', valor1: 90, valor2: 60 },
-      { dia: 'quinta-feira', valor1: 80, valor2: 55 },
-      { dia: 'sexta-feira', valor1: 100, valor2: 75 },
-      { dia: 'sábado', valor1: 130, valor2: 100 },
+      { dia: 'sunday', valor1: 50, valor2: 30 },
+      { dia: 'monday', valor1: 70, valor2: 40 },
+      { dia: 'tuesday', valor1: 110, valor2: 80 },
+      { dia: 'wednesday', valor1: 90, valor2: 60 },
+      { dia: 'Thursday', valor1: 80, valor2: 55 },
+      { dia: 'friday' , valor1: 100, valor2: 75 },
+      { dia: 'saturday', valor1: 130, valor2: 100 },
     ]
   },
-  'Taxa de Sucesso': {
-    title: 'Taxa de Sucesso',
+  'Success Rate': {
+    title: 'Success Rate',
     color1: '#f59e0b',
     color2: '#f97316',
     data: [
-      { dia: 'domingo', valor1: 300, valor2: 250 },
-      { dia: 'segunda-feira', valor1: 280, valor2: 220 },
-      { dia: 'terça-feira', valor1: 350, valor2: 290 },
-      { dia: 'quarta-feira', valor1: 320, valor2: 260 },
-      { dia: 'quinta-feira', valor1: 310, valor2: 250 },
-      { dia: 'sexta-feira', valor1: 340, valor2: 270 },
-      { dia: 'sábado', valor1: 390, valor2: 320 },
+      { dia: 'sunday', valor1: 300, valor2: 250 },
+      { dia: 'monday', valor1: 280, valor2: 220 },
+      { dia: 'tuesday', valor1: 350, valor2: 290 },
+      { dia: 'wednesday', valor1: 320, valor2: 260 },
+      { dia: 'Thursday', valor1: 310, valor2: 250 },
+      { dia: 'friday', valor1: 340, valor2: 270 },
+      { dia: 'saturday', valor1: 390, valor2: 320 },
     ]
   }
 };
 
 const icons = {
-  Adoção: <PlusCircle size={20} />,
-  Engajamento: <MessageCircle size={20} />,
-  Retenção: <Loader size={20} />,
-  'Taxa de Sucesso': <Award size={20} />
+  Adoption: <PlusCircle size={20} />,
+  Engagement: <MessageCircle size={20} />,
+  Retention: <Loader size={20} />,
+  'Success Rate': <Award size={20} />
 };
 
 export default function Dashboard() {
-  const [selectedMetric, setSelectedMetric] = useState('Engajamento');
+  const [selectedMetric, setSelectedMetric] = useState('Engagement');
 
   const { title, color1, color2, data } = datasets[selectedMetric];
 
@@ -80,10 +80,10 @@ export default function Dashboard() {
       <div className="p-6 bg-gray-50 min-h-screen">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800">
-            Conquistando a estilização perfeita:
+            Achieving the perfect style:
           </h1>
           <p className="text-base text-gray-500">
-            superando os desafios do seu Dashboard
+            overcoming your Dashboard challenges
           </p>
         </div>
 
@@ -93,10 +93,10 @@ export default function Dashboard() {
               key={metric}
               onClick={() => setSelectedMetric(metric)}
               className={`rounded-xl shadow-md p-6 text-white flex flex-col items-start justify-between gap-2
-                ${metric === 'Adoção' && 'bg-gradient-to-r from-blue-400 to-blue-600'}
-                ${metric === 'Engajamento' && 'bg-gradient-to-r from-purple-400 to-purple-600'}
-                ${metric === 'Retenção' && 'bg-gradient-to-r from-indigo-800 to-indigo-900'}
-                ${metric === 'Taxa de Sucesso' && 'bg-gradient-to-r from-orange-400 to-yellow-500'}
+                ${metric === 'Adoption' && 'bg-gradient-to-r from-blue-400 to-blue-600'}
+                ${metric === 'Engagement' && 'bg-gradient-to-r from-purple-400 to-purple-600'}
+                ${metric === 'Retention' && 'bg-gradient-to-r from-indigo-800 to-indigo-900'}
+                ${metric === 'Success Rate' && 'bg-gradient-to-r from-orange-400 to-yellow-500'}
                 ${selectedMetric === metric ? 'ring-4 ring-offset-2 ring-indigo-300' : ''}
               `}
             >
@@ -105,9 +105,9 @@ export default function Dashboard() {
                 {icons[metric]}
               </div>
               <h2 className="text-2xl font-bold">
-                {metric === 'Adoção' ? '2,2 mil' :
-                 metric === 'Engajamento' ? '1,6 mil' :
-                 metric === 'Retenção' ? '215,0' : '4,8'}
+                {metric === 'Adoption' ? '2,2 mil' :
+                 metric === 'Engagement' ? '1,6 mil' :
+                 metric === 'Retention' ? '215,0' : '4,8'}
               </h2>
               <p className="text-xs text-gray-200">↑ 1,0 mil</p>
             </button>
@@ -118,13 +118,13 @@ export default function Dashboard() {
 
         <div className="w-full bg-white rounded-xl shadow-md p-6">
           <div className="flex space-x-6 mb-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2"> 
               <div className="w-8 h-1" style={{ backgroundColor: color1 }}></div>
-              <span className="text-sm text-gray-700">Engajamento (Funcionamento adequado)</span>
+              <span className="text-sm text-gray-700">Engagement (Proper operation)</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-8 h-1" style={{ backgroundColor: color2 }}></div>
-              <span className="text-sm text-gray-700">Resultado</span>
+              <span className="text-sm text-gray-700">Result</span>
             </div>
           </div>
 

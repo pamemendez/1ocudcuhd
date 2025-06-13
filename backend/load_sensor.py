@@ -23,7 +23,7 @@ def load_sensors_from_csv(file_path):
                 observacao=row['observacao'] if row['observacao'] else '',
                 mac_address=row['mac_address'] if row['mac_address'] else None
             )
-    print('Dados carregados com sucesso!!!')
+    print('os dados foram carregados')
 
 if __name__ == "__main__":
     file_path = 'dados/sensores.csv'

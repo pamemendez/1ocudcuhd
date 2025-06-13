@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaLightbulb } from "react-icons/fa";
-import { GiPlantSeed } from "react-icons/gi"; // Ícone verde para Ambient
+import { GiPlantSeed } from "react-icons/gi"; // Ícone verde para MAP
 import { AiOutlineWarning } from "react-icons/ai"; // Ícone amarelo para Status
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +17,7 @@ export default function Settings() {
       case "SENSORS":
         navigate("/pageSensor");
         break;
-      case "AMBIENT":
+      case "MAP":
         navigate("/pageMap");
         break;
       case "STATUS":
@@ -37,11 +37,11 @@ export default function Settings() {
         >
           <FaLightbulb className="text-white text-3xl" />
         </div>
-        <h2 className="text-xl font-bold">Dandelion 1</h2>
+        <h2 className="text-xl font-bold">Luminosity</h2>
         <p className="text-base text-gray-300">Last Updated 4/14/2025</p>
       </>
     ),
-    AMBIENT: (
+    MAP: (
       <>
         <div
           className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
@@ -49,7 +49,7 @@ export default function Settings() {
         >
           <GiPlantSeed className="text-white text-3xl" />
         </div>
-        <h2 className="text-xl font-bold">Ambient Sensor</h2>
+        <h2 className="text-xl font-bold">MAP Sensor</h2>
         <p className="text-base text-gray-300">Updated 4/14/2025</p>
       </>
     ),
@@ -83,7 +83,7 @@ export default function Settings() {
             ☰
           </button>
           <div className="rounded-b-md overflow-hidden" style={{ backgroundColor: "#4681C4" }}>
-            {["SENSORS", "AMBIENT", "STATUS"].map((tab) => (
+            {["SENSORS", "MAP", "STATUS"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => handleTabClick(tab)}
@@ -116,12 +116,12 @@ export default function Settings() {
             </div>
           )}
 
-          {/* Atmospheric + Soil Info */}
+          {/* Atmospheric Sensorsic + Soil Info */}
           <div className="flex-1 p-8 grid grid-cols-2 gap-6">
-            {/* Atmospheric */}
+            {/* Atmospheric Sensorsic */}
             <div>
               <h4 className="text-base tracking-widest text-gray-400 border-b border-gray-600 pb-2 mb-6">
-                ATMOSPHERIC
+                ATMOSPHERIC SENSORS
               </h4>
               <div className="flex justify-between text-center">
                 <div>
@@ -148,7 +148,7 @@ export default function Settings() {
             {/* Soil */}
             <div>
               <h4 className="text-base tracking-widest text-gray-400 border-b border-gray-600 pb-2 mb-6">
-                SOIL
+                SOIL SENSORS
               </h4>
               <div className="grid grid-cols-2 gap-5">
                 <div>

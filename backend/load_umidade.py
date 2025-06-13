@@ -29,6 +29,6 @@ def load_umidade_data(csv_file_path):
                 print(f"{line_count} linhas processadas...")
 
     print("Fim da importação:", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    print(f"Dados carregados com sucesso de {csv_file_path}")
+    print(f"os dados foram carregados de {csv_file_path}")
 
 load_umidade_data('dados/umidade_data.csv')

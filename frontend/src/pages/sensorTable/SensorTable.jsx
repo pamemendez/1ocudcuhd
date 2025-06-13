@@ -25,17 +25,16 @@ const getStateStyle = (state) => ({
 });
 
 const SensorTable = () => {
-
   const [sensors, setSensors] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/api/sensor/`)
       .then(response => setSensors(response.data))
-      .catch(error => console.log(error))
-  }, [])
+      .catch(error => console.log(error));
+  }, []);
 
-  // Form state
   const [newSensor, setNewSensor] = useState({
     tipo: '',
     latitude: '',
@@ -46,19 +45,25 @@ const SensorTable = () => {
     observacao: '',
     status_operacional: true
   });
-  
+
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewSensor((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    const { name, value } = e.target;
+    if (name === 'status_operacional') {
+      setNewSensor((prev) => ({
+        ...prev,
+        [name]: value === 'Active', 
+      }));
+    } else {
+      setNewSensor((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
-  
+
   const handleAddSensor = (e) => {
     e.preventDefault();
-    console.log(newSensor);
-  
+
     axios.post(`http://127.0.0.1:8000/api/sensor/`, newSensor)
       .then(response => {
         setSensors([...sensors, response.data]);
@@ -79,39 +84,50 @@ const SensorTable = () => {
       });
   };
 
-  
+  const handleDeleteSensor = (id) => {
+  axios.delete(`http://127.0.0.1:8000/api/sensor/${id}/`)
+    .then(() => {
+      setSensors(sensors.filter(sensor => sensor.id !== id));
+    })
+    .catch(err => console.error('Error deleting sensor:', err));
+};
 
+// Estado para edição
+const [editSensor, setEditSensor] = useState(null);
+
+// Função para abrir modal de edição com sensor selecionado
+const handleEditClick = (sensor) => {
+  setEditSensor(sensor);
+  setIsModalOpen(true);  
+};
+
+// Função para salvar edição
+const handleUpdateSensor = (e) => {
+  e.preventDefault();
+  axios.put(`http://127.0.0.1:8000/api/sensor/${editSensor.id}/`, editSensor)
+    .then(response => {
+      setSensors(sensors.map(sensor => (sensor.id === editSensor.id ? response.data : sensor)));
+      setEditSensor(null);
+      setIsModalOpen(false);
+    })
+    .catch(err => console.error('Error updating sensor:', err));
+};
 
   return (
     <>
       <MainHeader />
-
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 'calc(100vh - 64px)',
-          backgroundColor: '#f5f6f8',
-        }}
-      >
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 64px)', backgroundColor: '#f5f6f8' }}>
         <div style={{ padding: '24px', flex: '1 0 auto' }}>
-          {/* Header */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '16px',
-            }}
-          >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 'bold' }}>Sensores Library</h2>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {/* Search Input */}
-              <div style={{ position: 'relative' }}>
+              {/* Campo de busca */}
+              <div style={{ position: 'relative', marginBottom: '10px' }}>
                 <input
                   type="text"
                   placeholder="Search"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
                   style={{
                     padding: '10px 40px 10px 14px',
                     borderRadius: '20px',
@@ -133,7 +149,7 @@ const SensorTable = () => {
                 />
               </div>
 
-              {/* Botão que abre o modal */}
+              {/* Botão para adicionar sensor */}
               <button
                 className="w-12 h-12 bg-[#3F9CFA] hover:bg-[#0C6CD3] rounded-full flex items-center justify-center"
                 onClick={() => setIsModalOpen(true)}
@@ -143,65 +159,60 @@ const SensorTable = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Tabela */}
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: '#3498db', color: '#fff' }}>
-                <th style={{ padding: '12px', borderTopLeftRadius: '8px', textAlign: 'center' }}>Tipo</th>
+                <th style={{ padding: '12px', borderTopLeftRadius: '8px', textAlign: 'center' }}>Type</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Latitude</th>
                 <th style={{ padding: '12px', textAlign: 'right' }}>Longitude</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Localização</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Responsável</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Unidade de medida</th>
-                <th style={{ padding: '12px', textAlign: 'left' }}>Observação</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Location</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Responsible</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Unit of Measure</th>
+                <th style={{ padding: '12px', textAlign: 'left' }}>Observation</th>
                 <th style={{ padding: '12px', textAlign: 'center' }}>Status</th>
-                <th style={{ padding: '12px', borderTopRightRadius: '8px', textAlign: 'center' }}>Mode</th>
+
               </tr>
             </thead>
             <tbody>
-              {sensors.map((sensor, index) => (
-                <tr
-                  key={index}
-                  style={{
-                    backgroundColor: '#fff',
-                    borderBottom: '1px solid #f0f0f0',
-                    verticalAlign: 'middle',
-                  }}
-                >
-                  <td style={{ padding: '14px', textAlign: 'center' }}>{sensor.tipo}</td>
-                  <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.latitude}</td>
-                  <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.longitude}</td>
-                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.localizacao}</td>
-                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.responsavel}</td>
-                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.unidade_medida}</td>
-                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.observacao}</td>
-                  <td style={{
-                    padding: '4px 8px',
-                    color: sensor.status_operacional ? '#155724' : '#721c24',
-                    backgroundColor: sensor.status_operacional ? '#c7f2d0' : '#f5bcbc',
-                    borderRadius: '4px',
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    textAlign: 'center',
-                    width: '70px',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {sensor.status_operacional ? 'Ativo' : 'Inativo'}
-                  </td>
-                  <td style={{ padding: '14px', textAlign: 'center' }}>{sensor.mode}</td>
-                </tr>
-              ))}
+              {sensors
+                .filter(sensor =>
+                  sensor.tipo.toLowerCase().includes(query.toLowerCase())
+                )
+                .map((sensor, index) => (
+                  <tr key={index} style={{ backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0', verticalAlign: 'middle' }}>
+                    <td style={{ padding: '14px', textAlign: 'center' }}>{sensor.tipo}</td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.latitude}</td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.longitude}</td>
+                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.localizacao}</td>
+                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.responsavel}</td>
+                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.unidade_medida}</td>
+                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.observacao}</td>
+                    <td style={{
+                      padding: '4px 8px',
+                      color: sensor.status_operacional ? '#155724' : '#721c24',
+                      backgroundColor: sensor.status_operacional ? '#c7f2d0' : '#f5bcbc',
+                      borderRadius: '4px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      textAlign: 'center',
+                      width: '70px',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {sensor.status_operacional ? 'Active' : 'InActive'}
+                    </td>
+
+                  </tr>
+                ))}
             </tbody>
           </table>
-
-
         </div>
 
         <div style={{ flexShrink: 0 }}>
           <Settings />
         </div>
 
-        {/* Modal simples */}
+        {/* Modal para adicionar sensor */}
         {isModalOpen && (
           <div
             style={{
@@ -231,7 +242,7 @@ const SensorTable = () => {
             >
               <h3 style={{ marginBottom: '16px' }}>Add new sensor</h3>
               <p style={{ marginBottom: '24px', color: '#3F51B5', fontWeight: '500' }}>
-                Preencha as informações
+                Fill in the information
               </p>
               <form onSubmit={handleAddSensor}>
                 <div
@@ -245,7 +256,7 @@ const SensorTable = () => {
                   <input
                     type="text"
                     name="tipo"
-                    placeholder="Tipo"
+                    placeholder="type"
                     value={newSensor.tipo}
                     onChange={handleInputChange}
                     required
@@ -254,7 +265,7 @@ const SensorTable = () => {
                   <input
                     type="text"
                     name="responsavel"
-                    placeholder="Responsavel"
+                    placeholder="Responsible"
                     value={newSensor.responsavel}
                     onChange={handleInputChange}
                     required
@@ -272,7 +283,7 @@ const SensorTable = () => {
                   <input
                     type="text"
                     name="unidade_medida"
-                    placeholder="Unidade de Medida"
+                    placeholder="Unit of Measure"
                     value={newSensor.unidade_medida}
                     onChange={handleInputChange}
                     required
@@ -290,7 +301,7 @@ const SensorTable = () => {
                   <input
                     type="text"
                     name="observacao"
-                    placeholder="Observação"
+                    placeholder="Observation"
                     value={newSensor.observacao}
                     onChange={handleInputChange}
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
@@ -298,19 +309,24 @@ const SensorTable = () => {
                   <input
                     type="text"
                     name="localizacao"
-                    placeholder="Localizacao"
+                    placeholder="Location"
                     value={newSensor.localizacao}
                     onChange={handleInputChange}
                     required
-                    style={{
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid #ccc',
-                      gridColumn: 'span 2',
-                    }}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', gridColumn: 'span 2' }}
                   />
-                </div>
 
+                  {/* Aqui está o campo select de status_operacional */}
+                  <select
+                    name="status_operacional"
+                    value={newSensor.status_operacional ? 'Active' : 'inActive'}
+                    onChange={handleInputChange}
+                    style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', gridColumn: 'span 2' }}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="inActive">InActive</option>
+                  </select>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                   <button
                     type="button"
@@ -343,6 +359,9 @@ const SensorTable = () => {
               </form>
             </div>
           </div>
+
+
+
         )}
       </div>
     </>
