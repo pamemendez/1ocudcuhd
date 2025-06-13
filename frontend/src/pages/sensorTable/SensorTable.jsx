@@ -1,39 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { FaPlus, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTrash, FaEdit } from 'react-icons/fa';
 import MainHeader from '../../componets/mainHeader/mainHeader';
 import Settings from '../../componets/settings/settings';
 import axios from 'axios';
-
-// const initialSensors = [
-//   { name: 'Sensor 1', state: 'Active Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-//   { name: 'Sensor 2', state: 'Inactive Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-//   { name: 'Sensor 3', state: 'Active Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-//   { name: 'Sensor 4', state: 'Active Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-//   { name: 'Sensor 5', state: 'Active Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-//   { name: 'Sensor 6', state: 'Active Alert', temperature: '2°C', margin: '±2°C', mode: 'Refrigerated Storage' },
-// ];
-
-
-const getStateStyle = (state) => ({
-  padding: '4px 10px',
-  borderRadius: '6px',
-  fontWeight: 500,
-  fontSize: '13px',
-  color: state === 'Active Alert' ? '#155724' : '#721c24',
-  backgroundColor: state === 'Active Alert' ? '#c7f2d0' : '#f5bcbc',
-  display: 'inline-block',
-});
 
 const SensorTable = () => {
   const [sensors, setSensors] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState('');
-
-  useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/api/sensor/`)
-      .then(response => setSensors(response.data))
-      .catch(error => console.log(error));
-  }, []);
 
   const [newSensor, setNewSensor] = useState({
     tipo: '',
@@ -46,12 +20,25 @@ const SensorTable = () => {
     status_operacional: true
   });
 
+  // Estado para edição
+  const [editSensor, setEditSensor] = useState(null);
+
+  // Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    axios.get(`http://127.0.0.1:8000/api/sensor/`)
+      .then(response => setSensors(response.data))
+      .catch(error => console.log(error));
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name === 'status_operacional') {
       setNewSensor((prev) => ({
         ...prev,
-        [name]: value === 'Active', 
+        [name]: value === 'Active',
       }));
     } else {
       setNewSensor((prev) => ({
@@ -64,54 +51,86 @@ const SensorTable = () => {
   const handleAddSensor = (e) => {
     e.preventDefault();
 
-    axios.post(`http://127.0.0.1:8000/api/sensor/`, newSensor)
-      .then(response => {
-        setSensors([...sensors, response.data]);
-        setNewSensor({
-          tipo: '',
-          latitude: '',
-          longitude: '',
-          localizacao: '',
-          responsavel: '',
-          unidade_medida: '',
-          observacao: '',
-          status_operacional: true
+    // Se estiver editando, faça update
+    if (editSensor) {
+      axios.put(`http://127.0.0.1:8000/api/sensor/${editSensor.id}/`, newSensor)
+        .then(response => {
+          setSensors(sensors.map(sensor => (sensor.id === editSensor.id ? response.data : sensor)));
+          setEditSensor(null);
+          setIsModalOpen(false);
+          setNewSensor({
+            tipo: '',
+            latitude: '',
+            longitude: '',
+            localizacao: '',
+            responsavel: '',
+            unidade_medida: '',
+            observacao: '',
+            status_operacional: true
+          });
+        })
+        .catch(err => console.error('Error updating sensor:', err));
+    } else {
+      // Adicionar novo sensor
+      axios.post(`http://127.0.0.1:8000/api/sensor/`, newSensor)
+        .then(response => {
+          setSensors([...sensors, response.data]);
+          setNewSensor({
+            tipo: '',
+            latitude: '',
+            longitude: '',
+            localizacao: '',
+            responsavel: '',
+            unidade_medida: '',
+            observacao: '',
+            status_operacional: true
+          });
+          setIsModalOpen(false);
+        })
+        .catch(error => {
+          console.error('Erro ao adicionar sensor:', error);
         });
-        setIsModalOpen(false);
-      })
-      .catch(error => {
-        console.error('Erro ao adicionar sensor:', error);
-      });
+    }
   };
 
   const handleDeleteSensor = (id) => {
-  axios.delete(`http://127.0.0.1:8000/api/sensor/${id}/`)
-    .then(() => {
-      setSensors(sensors.filter(sensor => sensor.id !== id));
-    })
-    .catch(err => console.error('Error deleting sensor:', err));
-};
+    axios.delete(`http://127.0.0.1:8000/api/sensor/${id}/`)
+      .then(() => {
+        setSensors(sensors.filter(sensor => sensor.id !== id));
+      })
+      .catch(err => console.error('Error deleting sensor:', err));
+  };
 
-// Estado para edição
-const [editSensor, setEditSensor] = useState(null);
+  const handleEditClick = (sensor) => {
+    setEditSensor(sensor);
+    setNewSensor({
+      tipo: sensor.tipo,
+      latitude: sensor.latitude,
+      longitude: sensor.longitude,
+      localizacao: sensor.localizacao,
+      responsavel: sensor.responsavel,
+      unidade_medida: sensor.unidade_medida,
+      observacao: sensor.observacao,
+      status_operacional: sensor.status_operacional
+    });
+    setIsModalOpen(true);
+  };
 
-// Função para abrir modal de edição com sensor selecionado
-const handleEditClick = (sensor) => {
-  setEditSensor(sensor);
-  setIsModalOpen(true);  
-};
+  // Filtrar sensores pelo campo 'tipo'
+  const filteredSensors = sensors.filter(sensor =>
+    sensor.tipo.toLowerCase().includes(query.toLowerCase())
+  );
 
-// Função para salvar edição
-const handleUpdateSensor = (e) => {
-  e.preventDefault();
-  axios.put(`http://127.0.0.1:8000/api/sensor/${editSensor.id}/`, editSensor)
-    .then(response => {
-      setSensors(sensors.map(sensor => (sensor.id === editSensor.id ? response.data : sensor)));
-      setEditSensor(null);
-      setIsModalOpen(false);
-    })
-    .catch(err => console.error('Error updating sensor:', err));
-};
+  // Calcular sensores da página atual
+  const indexOfLastSensor = currentPage * itemsPerPage;
+  const indexOfFirstSensor = indexOfLastSensor - itemsPerPage;
+  const currentSensors = filteredSensors.slice(indexOfFirstSensor, indexOfLastSensor);
+
+  // Número total de páginas
+  const totalPages = Math.ceil(filteredSensors.length / itemsPerPage);
+
+  // Função para mudar a página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <>
@@ -127,7 +146,10 @@ const handleUpdateSensor = (e) => {
                   type="text"
                   placeholder="Search"
                   value={query}
-                  onChange={e => setQuery(e.target.value)}
+                  onChange={e => {
+                    setQuery(e.target.value);
+                    setCurrentPage(1); // Resetar paginação ao buscar
+                  }}
                   style={{
                     padding: '10px 40px 10px 14px',
                     borderRadius: '20px',
@@ -152,7 +174,20 @@ const handleUpdateSensor = (e) => {
               {/* Botão para adicionar sensor */}
               <button
                 className="w-12 h-12 bg-[#3F9CFA] hover:bg-[#0C6CD3] rounded-full flex items-center justify-center"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                  setIsModalOpen(true);
+                  setEditSensor(null);
+                  setNewSensor({
+                    tipo: '',
+                    latitude: '',
+                    longitude: '',
+                    localizacao: '',
+                    responsavel: '',
+                    unidade_medida: '',
+                    observacao: '',
+                    status_operacional: true
+                  });
+                }}
               >
                 <FaPlus className="text-white text-xl" />
               </button>
@@ -171,48 +206,109 @@ const handleUpdateSensor = (e) => {
                 <th style={{ padding: '12px', textAlign: 'left' }}>Unit of Measure</th>
                 <th style={{ padding: '12px', textAlign: 'left' }}>Observation</th>
                 <th style={{ padding: '12px', textAlign: 'center' }}>Status</th>
-
+                <th style={{ padding: '12px', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {sensors
-                .filter(sensor =>
-                  sensor.tipo.toLowerCase().includes(query.toLowerCase())
-                )
-                .map((sensor, index) => (
-                  <tr key={index} style={{ backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0', verticalAlign: 'middle' }}>
-                    <td style={{ padding: '14px', textAlign: 'center' }}>{sensor.tipo}</td>
-                    <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.latitude}</td>
-                    <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.longitude}</td>
-                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.localizacao}</td>
-                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.responsavel}</td>
-                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.unidade_medida}</td>
-                    <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.observacao}</td>
-                    <td style={{
-                      padding: '4px 8px',
-                      color: sensor.status_operacional ? '#155724' : '#721c24',
-                      backgroundColor: sensor.status_operacional ? '#c7f2d0' : '#f5bcbc',
-                      borderRadius: '4px',
-                      fontWeight: '600',
-                      fontSize: '14px',
-                      textAlign: 'center',
-                      width: '70px',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {sensor.status_operacional ? 'Active' : 'InActive'}
-                    </td>
-
-                  </tr>
-                ))}
+              {currentSensors.map((sensor, index) => (
+                <tr key={sensor.id} style={{ backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0', verticalAlign: 'middle' }}>
+                  <td style={{ padding: '14px', textAlign: 'center' }}>{sensor.tipo}</td>
+                  <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.latitude}</td>
+                  <td style={{ padding: '14px', textAlign: 'right' }}>{sensor.longitude}</td>
+                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.localizacao}</td>
+                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.responsavel}</td>
+                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.unidade_medida}</td>
+                  <td style={{ padding: '14px', textAlign: 'left' }}>{sensor.observacao}</td>
+                  <td style={{
+                    padding: '4px 8px',
+                    color: sensor.status_operacional ? '#155724' : '#721c24',
+                    backgroundColor: sensor.status_operacional ? '#c7f2d0' : '#f5bcbc',
+                    borderRadius: '4px',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    textAlign: 'center',
+                    width: '70px',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {sensor.status_operacional ? 'Active' : 'InActive'}
+                  </td>
+                  <td style={{ padding: '14px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <button
+                      onClick={() => handleEditClick(sensor)}
+                      style={{ marginRight: '8px', cursor: 'pointer', background: 'none', border: 'none' }}
+                      aria-label="Edit sensor"
+                    >
+                      <FaEdit color="#3F9CFA" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSensor(sensor.id)}
+                      style={{ cursor: 'pointer', background: 'none', border: 'none' }}
+                      aria-label="Delete sensor"
+                    >
+                      <FaTrash color="#d11a2a" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+
+          {/* Paginação */}
+          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                backgroundColor: currentPage === 1 ? '#eee' : '#fff',
+                cursor: currentPage === 1 ? 'default' : 'pointer'
+              }}
+            >
+              Prev
+            </button>
+            {[...Array(totalPages)].map((_, i) => {
+              const pageNumber = i + 1;
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => paginate(pageNumber)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc',
+                    backgroundColor: currentPage === pageNumber ? '#3F9CFA' : '#fff',
+                    color: currentPage === pageNumber ? '#fff' : '#000',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                backgroundColor: currentPage === totalPages ? '#eee' : '#fff',
+                cursor: currentPage === totalPages ? 'default' : 'pointer'
+              }}
+            >
+              Next
+            </button>
+          </div>
+
         </div>
 
         <div style={{ flexShrink: 0 }}>
           <Settings />
         </div>
 
-        {/* Modal para adicionar sensor */}
+        {/* Modal para adicionar/editar sensor */}
         {isModalOpen && (
           <div
             style={{
@@ -240,7 +336,9 @@ const handleUpdateSensor = (e) => {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
               }}
             >
-              <h3 style={{ marginBottom: '16px' }}>Add new sensor</h3>
+              <h3 style={{ marginBottom: '16px' }}>
+                {editSensor ? 'Edit sensor' : 'Add new sensor'}
+              </h3>
               <p style={{ marginBottom: '24px', color: '#3F51B5', fontWeight: '500' }}>
                 Fill in the information
               </p>
@@ -256,7 +354,7 @@ const handleUpdateSensor = (e) => {
                   <input
                     type="text"
                     name="tipo"
-                    placeholder="type"
+                    placeholder="Type"
                     value={newSensor.tipo}
                     onChange={handleInputChange}
                     required
@@ -316,7 +414,6 @@ const handleUpdateSensor = (e) => {
                     style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc', gridColumn: 'span 2' }}
                   />
 
-                  {/* Aqui está o campo select de status_operacional */}
                   <select
                     name="status_operacional"
                     value={newSensor.status_operacional ? 'Active' : 'inActive'}
@@ -330,7 +427,10 @@ const handleUpdateSensor = (e) => {
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                   <button
                     type="button"
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setEditSensor(null);
+                    }}
                     style={{
                       padding: '8px 16px',
                       backgroundColor: '#fff',
@@ -353,15 +453,12 @@ const handleUpdateSensor = (e) => {
                       cursor: 'pointer',
                     }}
                   >
-                    Create
+                    {editSensor ? 'Save' : 'Create'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
-
-
-
         )}
       </div>
     </>

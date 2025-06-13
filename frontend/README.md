@@ -18,9 +18,11 @@ py -m venv env
 .\env\Scripts\activate
 pip install -r .\requirements.txt
 py .\manage.py migrate
-py .\load_sensor.py   
-(⚠️ Execute todos os scripts load_*.py disponíveis para popular o banco com os dados dos sensores.)
+py .\load_sensor.py    
 py manage.py runserver
+(⚠️ Execute todos os scripts load_*.py disponíveis para popular o banco com os dados dos sensores.)
+py .\load_luminosidade.py
+...
 
 ### 🔧 Frontend
  npm i -g pnpm

@@ -54,11 +54,12 @@ export default function MainHeader() {
       </nav>
 
       <button
-        className="flex items-center overflow-hidden rounded-full h-12 bg-[#3F9CFA]"
+        className="flex items-center overflow-hidden rounded-full h-12 bg-[#3F9CFA] hover:bg-[#1e7edb] transition-colors"
         onClick={() => navigate('/login')}
       >
         <span className="text-white font-medium text-lg px-4">Login</span>
       </button>
+
     </header>
   );
 }
